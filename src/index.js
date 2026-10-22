@@ -39,14 +39,14 @@ export class TetrisRoom {
       try {
         const data = JSON.parse(event.data);
         
-        // Broadcast aman ke session lain (membersihkan sesi mati secara otomatis)
+        // Broadcast pesan ke pemain LAIN di room yang sama
         this.sessions = this.sessions.filter(session => {
           if (session === server) return true;
           try {
             session.send(JSON.stringify(data));
             return true;
           } catch (e) {
-            return false; // Hapus sesi yang terputus
+            return false;
           }
         });
       } catch (err) {
