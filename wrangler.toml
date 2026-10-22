@@ -13,4 +13,4 @@ bindings = [
 
 [[migrations]]
 tag = "v1"
-new_classes = ["TetrisRoom"]
+new_sqlite_classes = ["TetrisRoom"]
