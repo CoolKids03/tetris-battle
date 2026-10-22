@@ -118,7 +118,7 @@
             opacity: 0.85;
         }
 
-        /* Pemain Utama di Kanan (Lebih Besar) */
+        /* Pemain Utama di Kanan (Ukuran Besar: 300x600) */
         .main-board-wrap {
             position: relative;
         }
@@ -187,8 +187,8 @@
 
         const COLS = 10;
         const ROWS = 20;
-        const P_BLOCK = 30; // Ukuran besar untuk player (300x600)
-        const O_BLOCK = 10; // Ukuran mini untuk lawan (100x200)
+        const P_BLOCK = 30;
+        const O_BLOCK = 10;
 
         let board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
         let opponentBoard = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
@@ -200,7 +200,7 @@
             [[1,0,0],[1,1,1]], [[0,0,1],[1,1,1]],
             [[0,1,1],[1,1,0]], [[1,1,0],[0,1,1]]
         ];
-        const COLORS = [null, '#00f0f0', '#f0f000', '#a000f0', '#f0a000', '#0000f0', '#00f000', '#f00000', '#888888']; // 8 = Garbage
+        const COLORS = [null, '#00f0f0', '#f0f000', '#a000f0', '#f0a000', '#0000f0', '#00f000', '#f00000', '#555555'];
 
         let currentPiece = null;
         let isTouching = false;
@@ -329,18 +329,20 @@
         function clearLines() {
             let linesCleared = 0;
             for (let r = ROWS - 1; r >= 0; r--) {
-                if (board[r].every(cell => cell !== 0 && cell !== 8)) {
+                // Baris penuh jika tidak ada sel yang bernilai 0
+                if (board[r].every(cell => cell !== 0)) {
                     board.splice(r, 1);
                     board.unshift(Array(COLS).fill(0));
                     linesCleared++;
-                    r++;
+                    r++; // Periksa kembali indeks baris yang sama setelah digeser turun
                 }
             }
 
+            // Aturan Serangan Battle yang Pasti Terkirim
             let attackGarbage = 0;
             if (linesCleared === 2) attackGarbage = 1;
             else if (linesCleared === 3) attackGarbage = 2;
-            else if (linesCleared === 4) attackGarbage = 4;
+            else if (linesCleared >= 4) attackGarbage = 4;
 
             if (attackGarbage > 0 && ws && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ type: 'ATTACK', count: attackGarbage }));
@@ -349,10 +351,10 @@
 
         function receiveGarbage(count) {
             for (let i = 0; i < count; i++) {
-                board.shift();
+                board.shift(); // Hapus baris teratas
                 let hole = Math.floor(Math.random() * COLS);
-                let garbageRow = Array(COLS).fill(8);
-                garbageRow[hole] = 0;
+                let garbageRow = Array(COLS).fill(8); // Warna Abu-abu (Garbage)
+                garbageRow[hole] = 0; // Lubang
                 board.push(garbageRow);
             }
             sendBoardState();
