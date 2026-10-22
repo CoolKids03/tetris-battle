@@ -1,0 +1,8 @@
+{
+  "name": "tetris-battle",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "npx wrangler pages dev ./public"
+  }
+}
