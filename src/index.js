@@ -2,24 +2,17 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // Tangani koneksi WebSocket / Room
     if (url.pathname === '/api/ws') {
       const roomCode = url.searchParams.get('room') || 'default';
-      
-      // Ambil ID Durable Object berdasarkan Nama/Kode Room
       const id = env.ROOM_DO.idFromName(roomCode.toUpperCase());
       const stub = env.ROOM_DO.get(id);
-
-      // Teruskan request WebSocket ke Durable Object room tersebut
       return stub.fetch(request);
     }
 
-    // Sajikan file statis web dari folder public
     return env.ASSETS.fetch(request);
   }
 };
 
-// Durable Object untuk mengelola Room secara terpusat
 export class TetrisRoom {
   constructor(state, env) {
     this.state = state;
@@ -38,7 +31,6 @@ export class TetrisRoom {
     server.accept();
     this.sessions.push(server);
 
-    // Jika sudah ada 2 pemain di room ini, mulai game untuk keduanya
     if (this.sessions.length === 2) {
       this.broadcast({ type: 'START' });
     }
@@ -46,10 +38,15 @@ export class TetrisRoom {
     server.addEventListener('message', event => {
       try {
         const data = JSON.parse(event.data);
-        // Teruskan pesan ke pemain lain di room yang sama
-        this.sessions.forEach(session => {
-          if (session !== server) {
+        
+        // Broadcast aman ke session lain (membersihkan sesi mati secara otomatis)
+        this.sessions = this.sessions.filter(session => {
+          if (session === server) return true;
+          try {
             session.send(JSON.stringify(data));
+            return true;
+          } catch (e) {
+            return false; // Hapus sesi yang terputus
           }
         });
       } catch (err) {
@@ -66,6 +63,13 @@ export class TetrisRoom {
 
   broadcast(message) {
     const msgStr = JSON.stringify(message);
-    this.sessions.forEach(session => session.send(msgStr));
+    this.sessions = this.sessions.filter(session => {
+      try {
+        session.send(msgStr);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    });
   }
 }
