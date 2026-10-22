@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "npx wrangler pages dev ./public"
+    "build": "echo 'No build required'",
+    "deploy": "npx wrangler deploy"
   }
 }
