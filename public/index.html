@@ -216,16 +216,16 @@
 
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-
+            
                 if (data.type === 'START') {
                     gameStarted = true;
                     document.getElementById('gameStatus').innerText = 'BATTLE BERMULA!';
                     resetGame();
                 } else if (data.type === 'STATE_UPDATE') {
                     opponentBoard = data.board;
-                } else if (data.type === 'GARBAGE') {
+                } else if (data.type === 'ATTACK') {
                     receiveGarbage(data.count);
-                } else if (data.type === 'OPPONENT_LOST') {
+                } else if (data.type === 'LOST' || data.type === 'OPPONENT_LOST') {
                     document.getElementById('gameStatus').innerText = 'KAMU MENANG! 🎉';
                     gameOver = true;
                 }
